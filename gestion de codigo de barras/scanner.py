@@ -28,11 +28,13 @@ while True:
         barcode_text = barcode.data.decode("utf-8")
         print(barcode_text)
 
-        # release the camera and destroy all windows
-        cap.release()
-        cv2.destroyAllWindows()
+        # display the frame
+        cv2.imshow("Barcode Scanner", frame)
 
-        # exit the loop
-        break
+        # exit the loop if the 'q' key is pressed
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+
+        
 cap.release()
 cv2.destroyAllWindows()
