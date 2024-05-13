@@ -1,8 +1,13 @@
 import cv2
-import pyzbar.pyzbar as pyzbar
+
+# Cargar el clasificador de códigos de barras
+barcodes_cascade = cv2.CascadeClassifier('barcodes.xml')
 
 # Inicializar la cámara
 cap = cv2.VideoCapture(0)
+
+# Crear una variable para almacenar los códigos de barras leídos
+barcodes_read = []
 
 while True:
     # Leer un frame de la cámara
@@ -12,12 +17,18 @@ while True:
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
     # Detectar los códigos de barras en el frame
-    barcodes = pyzbar.decode(gray)
+    barcodes = barcodes_cascade.detectMultiScale(gray)
 
     # Dibujar los rectángulos alrededor de los códigos de barras detectados
-    for barcode in barcodes:
-        (x, y, w, h) = barcode.rect
+    for (x, y, w, h) in barcodes:
         cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+
+        # Leer el código de barras
+        barcode = gray[y:y+h, x:x+w]
+        barcode_text = cv2.readBarcodes(barcode, cv2.Barcode.DECODE_ALL)[0][0]
+
+        # Almacenar el código de barras leído
+        barcodes_read.append(barcode_text)
 
     # Mostrar la ventana con la cámara y los códigos de barras detectados
     cv2.imshow('Cámara', frame)
@@ -29,3 +40,8 @@ while True:
 # Liberar la cámara y cerrar las ventanas
 cap.release()
 cv2.destroyAllWindows()
+
+# Imprimir los códigos de barras leídos
+print("Códigos de barras leídos:")
+for barcode in barcodes_read:
+    print(barcode)
