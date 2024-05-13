@@ -1,41 +1,31 @@
 import cv2
 import pyzbar.pyzbar as pyzbar
 
-# initialize the camera
+# Inicializar la cámara
 cap = cv2.VideoCapture(0)
 
 while True:
-    # read the frame from the camera
+    # Leer un frame de la cámara
     ret, frame = cap.read()
 
-    # check if the frame was read correctly
-    if not ret:
-        print("Error: frame was not read correctly")
-        break
+    # Convertir el frame a escala de grises
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
-    # decode the barcode from the frame
-    barcodes = pyzbar.decode(frame)
+    # Detectar los códigos de barras en el frame
+    barcodes = pyzbar.decode(gray)
 
-    # check if any barcode was detected
-    if len(barcodes) > 0:
-        # get the first barcode
-        barcode = barcodes[0]
-
-        # draw a bounding box around the barcode and display the text
-        x, y, w, h = barcode.rect
+    # Dibujar los rectángulos alrededor de los códigos de barras detectados
+    for barcode in barcodes:
+        (x, y, w, h) = barcode.rect
         cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
-        cv2.putText(frame, barcode.data.decode("utf-8"), (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
 
-        # print the barcode data to the console
-        print(barcode.data.decode("utf-8"))
+    # Mostrar la ventana con la cámara y los códigos de barras detectados
+    cv2.imshow('Cámara', frame)
 
-    # display the frame
-    cv2.imshow("Barcode Scanner", frame)
-
-    # exit the loop if the 'q' key is pressed
+    # Salir del bucle si se presiona la tecla 'q'
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
-# release the camera and destroy all windows
+# Liberar la cámara y cerrar las ventanas
 cap.release()
 cv2.destroyAllWindows()
