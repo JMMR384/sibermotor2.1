@@ -8,6 +8,11 @@ while True:
     # read the frame from the camera
     ret, frame = cap.read()
 
+    # check if the frame was read correctly
+    if not ret:
+        print("Error: frame was not read correctly")
+        break
+
     # decode the barcode from the frame
     barcodes = pyzbar.decode(frame)
 
