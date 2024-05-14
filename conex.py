@@ -3,7 +3,7 @@ import mysql.connector
 # Configurar la conexión a la base de datos
 db_config = {
     'user': 'root',
-    'password': ' ',
+    'password': '',
     'host': 'localhost',
     'database': 'sibermotor'
 }
