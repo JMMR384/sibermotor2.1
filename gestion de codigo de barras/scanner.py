@@ -1,47 +1,33 @@
 import cv2
+import pyzxing
+from pyzxing import BarcodeFormat, Reader
 
-# Cargar el clasificador de códigos de barras
-barcodes_cascade = cv2.CascadeClassifier('barcodes.xml')
+# Initialize the ZXing barcode reader
+reader = Reader()
 
-# Inicializar la cámara
+# Open the webcam
 cap = cv2.VideoCapture(0)
 
-# Crear una variable para almacenar los códigos de barras leídos
-barcodes_read = []
-
 while True:
-    # Leer un frame de la cámara
+    # Capture a frame from the webcam
     ret, frame = cap.read()
 
-    # Convertir el frame a escala de grises
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    # Convert the frame to RGB format
+    rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-    # Detectar los códigos de barras en el frame
-    barcodes = barcodes_cascade.detectMultiScale(gray)
+    # Decode the barcode from the frame
+    barcode = None
+    try:
+        barcode = reader.decode(rgb_frame, formats=[BarcodeFormat.QR_CODE, BarcodeFormat.CODE_128])
+    except pyzxing.NotFoundException:
+        pass
 
-    # Dibujar los rectángulos alrededor de los códigos de barras detectados
-    for (x, y, w, h) in barcodes:
-        cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
-
-        # Leer el código de barras
-        barcode = gray[y:y+h, x:x+w]
-        barcode_text = cv2.readBarcodes(barcode, cv2.Barcode.DECODE_ALL)[0][0]
-
-        # Almacenar el código de barras leído
-        barcodes_read.append(barcode_text)
-
-    # Mostrar la ventana con la cámara y los códigos de barras detectados
-    cv2.imshow('Cámara', frame)
-
-    # Salir del bucle si se presiona la tecla 'q'
-    if cv2.waitKey(1) & 0xFF == ord('q'):
+    # If a barcode was found, print it to the console and break the loop
+    if barcode is not None:
+        print("Barcode format:", barcode.format)
+        print("Barcode text:", barcode.text)
         break
 
-# Liberar la cámara y cerrar las ventanas
+# Release the webcam and destroy all windows
 cap.release()
 cv2.destroyAllWindows()
-
-# Imprimir los códigos de barras leídos
-print("Códigos de barras leídos:")
-for barcode in barcodes_read:
-    print(barcode)
