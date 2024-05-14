@@ -1,33 +1,26 @@
-import cv2
-import pyzxing
-from pyzxing import BarcodeFormat, Reader
+# Connect to the database
+try:
+    conn = mysql.connector.connect(
+        host="localhost",
+        user="root",
+        password="",
+        database="sibermotor"
+    )
+except mysql.connector.Error as e:
+    print(f"Error connecting to database: {e}")
+    exit()
 
-# Initialize the ZXing barcode reader
-reader = Reader()
+# Create a cursor object
+c = conn.cursor()
 
-# Open the webcam
-cap = cv2.VideoCapture(0)
+# Insert a new product into the database
+nombre = "Product name"
+precio = 10
+c.execute("INSERT INTO productos (nombre, precio) VALUES (%s, %s)", (nombre, precio))
 
-while True:
-    # Capture a frame from the webcam
-    ret, frame = cap.read()
+# Commit the transaction and close the cursor object
+conn.commit()
+c.close()
 
-    # Convert the frame to RGB format
-    rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-
-    # Decode the barcode from the frame
-    barcode = None
-    try:
-        barcode = reader.decode(rgb_frame, formats=[BarcodeFormat.QR_CODE, BarcodeFormat.CODE_128])
-    except pyzxing.NotFoundException:
-        pass
-
-    # If a barcode was found, print it to the console and break the loop
-    if barcode is not None:
-        print("Barcode format:", barcode.format)
-        print("Barcode text:", barcode.text)
-        break
-
-# Release the webcam and destroy all windows
-cap.release()
-cv2.destroyAllWindows()
+# Close the database connection
+conn.close()
